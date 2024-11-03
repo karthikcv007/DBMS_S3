@@ -1,0 +1,111 @@
+mysql> create database db2;
+Query OK, 1 row affected (0.01 sec)
+
+mysql> use db2;
+Database changed
+mysql> -- 1. Create the Employee table
+mysql> CREATE TABLE Employee (
+    ->     employee_id INT PRIMARY KEY,
+    ->     employee_name VARCHAR(50),
+    ->     designation VARCHAR(50),
+    ->     department_no INT,
+    ->     employee_salary DECIMAL(10, 2)
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> 
+mysql> -- 2. Insert 5 sample records into the Employee table
+mysql> INSERT INTO Employee (employee_id, employee_name, designation, department_no, employee_salary)
+    -> VALUES (1, 'Alice', 'Manager', 101, 55000),
+    ->        (2, 'Bob', 'Developer', 102, 45000),
+    ->        (3, 'Charlie', 'Analyst', 103, 40000),
+    ->        (4, 'David', 'Designer', 104, 42000),
+    ->        (5, 'Eva', 'Tester', 105, 38000);
+Query OK, 5 rows affected (0.00 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> 
+mysql> -- Display current data in the Employee table
+mysql> SELECT * FROM Employee;
++-------------+---------------+-------------+---------------+-----------------+
+| employee_id | employee_name | designation | department_no | employee_salary |
++-------------+---------------+-------------+---------------+-----------------+
+|           1 | Alice         | Manager     |           101 |        55000.00 |
+|           2 | Bob           | Developer   |           102 |        45000.00 |
+|           3 | Charlie       | Analyst     |           103 |        40000.00 |
+|           4 | David         | Designer    |           104 |        42000.00 |
+|           5 | Eva           | Tester      |           105 |        38000.00 |
++-------------+---------------+-------------+---------------+-----------------+
+5 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- 3. Create a savepoint named 's'
+mysql> SAVEPOINT s;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> 
+mysql> -- 4. Insert an additional row into the Employee table
+mysql> INSERT INTO Employee (employee_id, employee_name, designation, department_no, employee_salary)
+    -> VALUES (6, 'Frank', 'Intern', 106, 30000);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> 
+mysql> -- Display data after adding the extra row
+mysql> SELECT * FROM Employee;
++-------------+---------------+-------------+---------------+-----------------+
+| employee_id | employee_name | designation | department_no | employee_salary |
++-------------+---------------+-------------+---------------+-----------------+
+|           1 | Alice         | Manager     |           101 |        55000.00 |
+|           2 | Bob           | Developer   |           102 |        45000.00 |
+|           3 | Charlie       | Analyst     |           103 |        40000.00 |
+|           4 | David         | Designer    |           104 |        42000.00 |
+|           5 | Eva           | Tester      |           105 |        38000.00 |
+|           6 | Frank         | Intern      |           106 |        30000.00 |
++-------------+---------------+-------------+---------------+-----------------+
+6 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- 5. Rollback to the savepoint 's'
+mysql> ROLLBACK TO s;
+ERROR 1305 (42000): SAVEPOINT s does not exist
+mysql> 
+mysql> -- Display data after rollback
+mysql> SELECT * FROM Employee;
++-------------+---------------+-------------+---------------+-----------------+
+| employee_id | employee_name | designation | department_no | employee_salary |
++-------------+---------------+-------------+---------------+-----------------+
+|           1 | Alice         | Manager     |           101 |        55000.00 |
+|           2 | Bob           | Developer   |           102 |        45000.00 |
+|           3 | Charlie       | Analyst     |           103 |        40000.00 |
+|           4 | David         | Designer    |           104 |        42000.00 |
+|           5 | Eva           | Tester      |           105 |        38000.00 |
+|           6 | Frank         | Intern      |           106 |        30000.00 |
++-------------+---------------+-------------+---------------+-----------------+
+6 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- 6. Insert the extra row again
+mysql> INSERT INTO Employee (employee_id, employee_name, designation, department_no, employee_salary)
+    -> VALUES (6, 'Frank', 'Intern', 106, 30000);
+ERROR 1062 (23000): Duplicate entry '6' for key 'Employee.PRIMARY'
+mysql> 
+mysql> -- Commit the transaction
+mysql> COMMIT;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> 
+mysql> -- Display data after commit
+mysql> SELECT * FROM Employee;
++-------------+---------------+-------------+---------------+-----------------+
+| employee_id | employee_name | designation | department_no | employee_salary |
++-------------+---------------+-------------+---------------+-----------------+
+|           1 | Alice         | Manager     |           101 |        55000.00 |
+|           2 | Bob           | Developer   |           102 |        45000.00 |
+|           3 | Charlie       | Analyst     |           103 |        40000.00 |
+|           4 | David         | Designer    |           104 |        42000.00 |
+|           5 | Eva           | Tester      |           105 |        38000.00 |
+|           6 | Frank         | Intern      |           106 |        30000.00 |
++-------------+---------------+-------------+---------------+-----------------+
+6 rows in set (0.00 sec)
+
+

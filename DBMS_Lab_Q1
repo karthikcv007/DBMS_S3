@@ -1,0 +1,189 @@
+create database StdHostel;
+Query OK, 1 row affected (0.02 sec)
+
+mysql> use StdHostel;
+Database changed
+
+-- Query 1)  Create a table STUDENT with following attributes: student_id, Name, department, mark 1, mark 2, cgpa and insert a minimum of 5 values to it.
+
+
+mysql> CREATE TABLE STUDENT (
+    ->     student_id INT PRIMARY KEY,
+    ->     Name VARCHAR(50),
+    ->     department VARCHAR(50),
+    ->     mark1 FLOAT,
+    ->     mark2 FLOAT,
+    ->     cgpa FLOAT
+    -> );
+Query OK, 0 rows affected (0.02 sec)
+
+
+mysql> INSERT INTO STUDENT (student_id, Name, department, mark1, mark2, cgpa) VALUES
+    ->     (101, 'Anu', 'CS', 85.5, 90.0, 9.2),
+    ->     (102, 'Rahul', 'EC', 75.0, 80.0, 8.5),
+    ->     (103, 'Amit', 'CS', 65.0, 70.0, 7.0),
+    ->     (104, 'Sita', 'ME', 80.0, 85.0, 8.0),
+    ->     (105, 'Vikram', 'CS', 90.0, 95.0, 9.0);
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+-- Query 2) Create table hostel_details with following attributes: std_id, stud_name, block, roomno and insert 5 rows for the table
+
+
+mysql> CREATE TABLE hostel_details (
+    ->     std_id INT PRIMARY KEY,
+    ->     stud_name VARCHAR(50),
+    ->     block VARCHAR(10),
+    ->     roomno INT
+    -> );
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> INSERT INTO hostel_details (std_id, stud_name, block, roomno) VALUES
+    ->     (101, 'Anu', 'A', 101),
+    ->     (102, 'Rahul', 'B', 102),
+    ->     (103, 'Amit', 'A', 103),
+    ->     (104, 'Sita', 'C', 104),
+    ->     (105, 'Vikram', 'A', 108);
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+-- Query 3) Display the details of student
+
+
+mysql> SELECT * FROM STUDENT;
++------------+--------+------------+-------+-------+------+
+| student_id | Name   | department | mark1 | mark2 | cgpa |
++------------+--------+------------+-------+-------+------+
+|        101 | Anu    | CS         |  85.5 |    90 |  9.2 |
+|        102 | Rahul  | EC         |    75 |    80 |  8.5 |
+|        103 | Amit   | CS         |    65 |    70 |    7 |
+|        104 | Sita   | ME         |    80 |    85 |    8 |
+|        105 | Vikram | CS         |    90 |    95 |    9 |
++------------+--------+------------+-------+-------+------+
+5 rows in set (0.00 sec)
+
+-- Query 4) Display details of hostel_details
+
+mysql> SELECT * FROM hostel_details;
++--------+-----------+-------+--------+
+| std_id | stud_name | block | roomno |
++--------+-----------+-------+--------+
+|    101 | Anu       | A     |    101 |
+|    102 | Rahul     | B     |    102 |
+|    103 | Amit      | A     |    103 |
+|    104 | Sita      | C     |    104 |
+|    105 | Vikram    | A     |    108 |
++--------+-----------+-------+--------+
+5 rows in set (0.00 sec)
+
+-- Query 5) Rename table hostel_details to hostel
+
+
+mysql> ALTER TABLE hostel_details RENAME TO hostel;
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> select * from hostel;
++--------+-----------+-------+--------+
+| std_id | stud_name | block | roomno |
++--------+-----------+-------+--------+
+|    101 | Anu       | A     |    101 |
+|    102 | Rahul     | B     |    102 |
+|    103 | Amit      | A     |    103 |
+|    104 | Sita      | C     |    104 |
+|    105 | Vikram    | A     |    108 |
++--------+-----------+-------+--------+
+5 rows in set (0.00 sec)
+
+-- Query 6) Update the value of CGPA whose student_id is 103 from cgpa 7 to 8
+
+
+mysql> UPDATE STUDENT 
+    -> SET cgpa = 8 
+    -> WHERE student_id = 103;
+Query OK, 1 row affected (0.01 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+-- Query 7) Display the name of the students whose cgpa is more than 8
+
+
+mysql> SELECT Name 
+    -> FROM STUDENT 
+    -> WHERE cgpa > 8;
++--------+
+| Name   |
++--------+
+| Anu    |
+| Rahul  |
+| Vikram |
++--------+
+3 rows in set (0.00 sec)
+
+-- Query 8) Display the name of student staying in block A of the table hostel
+
+
+mysql> SELECT stud_name 
+    -> FROM hostel 
+    -> WHERE block = 'A';
++-----------+
+| stud_name |
++-----------+
+| Anu       |
+| Amit      |
+| Vikram    |
++-----------+
+3 rows in set (0.00 sec)
+
+-- Query 9) Display name of student who belong to cs dept
+
+mysql> SELECT Name 
+    -> FROM STUDENT 
+    -> WHERE department = 'CS';
++--------+
+| Name   |
++--------+
+| Anu    |
+| Amit   |
+| Vikram |
++--------+
+3 rows in set (0.00 sec)
+
+-- Query 10) Delete the name of student whose room number is 108
+
+
+mysql> DELETE FROM hostel 
+    -> WHERE roomno = 108;
+Query OK, 1 row affected (0.01 sec)
+
+-- Query 11) Modify the department of the student’ anu’ from cs to ec   
+
+
+mysql> UPDATE STUDENT 
+    -> SET department = 'EC' 
+    -> WHERE Name = 'Anu';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from hostel
+    -> ;
++--------+-----------+-------+--------+
+| std_id | stud_name | block | roomno |
++--------+-----------+-------+--------+
+|    101 | Anu       | A     |    101 |
+|    102 | Rahul     | B     |    102 |
+|    103 | Amit      | A     |    103 |
+|    104 | Sita      | C     |    104 |
++--------+-----------+-------+--------+
+4 rows in set (0.00 sec)
+
+mysql> select * from STUDENT;
++------------+--------+------------+-------+-------+------+
+| student_id | Name   | department | mark1 | mark2 | cgpa |
++------------+--------+------------+-------+-------+------+
+|        101 | Anu    | EC         |  85.5 |    90 |  9.2 |
+|        102 | Rahul  | EC         |    75 |    80 |  8.5 |
+|        103 | Amit   | CS         |    65 |    70 |    8 |
+|        104 | Sita   | ME         |    80 |    85 |    8 |
+|        105 | Vikram | CS         |    90 |    95 |    9 |
++------------+--------+------------+-------+-------+------+
+5 rows in set (0.00 sec)
+

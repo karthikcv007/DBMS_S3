@@ -1,0 +1,195 @@
+mysql> -- Step 1: Create the Bank Database and Account Table
+mysql> CREATE DATABASE bank;
+Query OK, 1 row affected (0.02 sec)
+
+mysql> USE bank;
+Database changed
+mysql> 
+mysql> CREATE TABLE account (
+    ->     account_number BIGINT PRIMARY KEY,
+    ->     ifsc_code VARCHAR(20),
+    ->     bank_name VARCHAR(100),
+    ->     bank_branch VARCHAR(100),
+    ->     account_type VARCHAR(20),
+    ->     account_balance DECIMAL(15, 2)
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> 
+mysql> -- Step 2: Insert sample data into the account table
+mysql> -- Insert sample data into the account table
+mysql> INSERT INTO account (account_number, ifsc_code, bank_name, bank_branch, account_type, account_balance) 
+    -> VALUES 
+    -> (1234567890, 'IFSC0001', 'Bank of America', 'New York', 'Savings', 10500.75),
+    -> (9876543210, 'IFSC0002', 'Chase Bank', 'Los Angeles', 'Checking', 20500.55),
+    -> (1122334455, 'IFSC0003', 'Wells Fargo', 'San Francisco', 'Business', 15000.00),
+    -> (5566778899, 'IFSC0004', 'Citibank', 'Chicago', 'Savings', 17550.25),
+    -> (6677889900, 'IFSC0005', 'HSBC Bank', 'Miami', 'Checking', 22000.30)
+    -> ON DUPLICATE KEY UPDATE account_number = account_number;
+Query OK, 5 rows affected (0.00 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> 
+mysql> select * from account;
++----------------+-----------+-----------------+---------------+--------------+-----------------+
+| account_number | ifsc_code | bank_name       | bank_branch   | account_type | account_balance |
++----------------+-----------+-----------------+---------------+--------------+-----------------+
+|     1122334455 | IFSC0003  | Wells Fargo     | San Francisco | Business     |        15000.00 |
+|     1234567890 | IFSC0001  | Bank of America | New York      | Savings      |        10500.75 |
+|     5566778899 | IFSC0004  | Citibank        | Chicago       | Savings      |        17550.25 |
+|     6677889900 | IFSC0005  | HSBC Bank       | Miami         | Checking     |        22000.30 |
+|     9876543210 | IFSC0002  | Chase Bank      | Los Angeles   | Checking     |        20500.55 |
++----------------+-----------+-----------------+---------------+--------------+-----------------+
+5 rows in set (0.00 sec)
+
+mysql> -- Step 3: Queries
+mysql> 
+mysql> -- 3(a) Character String Functions on "bank_name"
+mysql> -- Convert bank_name to uppercase
+mysql> SELECT bank_name, UPPER(bank_name) AS bank_name_upper FROM account;
++-----------------+-----------------+
+| bank_name       | bank_name_upper |
++-----------------+-----------------+
+| Wells Fargo     | WELLS FARGO     |
+| Bank of America | BANK OF AMERICA |
+| Citibank        | CITIBANK        |
+| HSBC Bank       | HSBC BANK       |
+| Chase Bank      | CHASE BANK      |
++-----------------+-----------------+
+5 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- Convert bank_name to lowercase
+mysql> SELECT bank_name, LOWER(bank_name) AS bank_name_lower FROM account;
++-----------------+-----------------+
+| bank_name       | bank_name_lower |
++-----------------+-----------------+
+| Wells Fargo     | wells fargo     |
+| Bank of America | bank of america |
+| Citibank        | citibank        |
+| HSBC Bank       | hsbc bank       |
+| Chase Bank      | chase bank      |
++-----------------+-----------------+
+5 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- Find the length of bank_name
+mysql> SELECT bank_name, LENGTH(bank_name) AS bank_name_length FROM account;
++-----------------+------------------+
+| bank_name       | bank_name_length |
++-----------------+------------------+
+| Wells Fargo     |               11 |
+| Bank of America |               15 |
+| Citibank        |                8 |
+| HSBC Bank       |                9 |
+| Chase Bank      |               10 |
++-----------------+------------------+
+5 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- Replace 'Bank' in bank_name with 'Financial'
+mysql> SELECT bank_name, REPLACE(bank_name, 'Bank', 'Financial') AS bank_name_replaced FROM account;
++-----------------+----------------------+
+| bank_name       | bank_name_replaced   |
++-----------------+----------------------+
+| Wells Fargo     | Wells Fargo          |
+| Bank of America | Financial of America |
+| Citibank        | Citibank             |
+| HSBC Bank       | HSBC Financial       |
+| Chase Bank      | Chase Financial      |
++-----------------+----------------------+
+5 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- 3(b) Numeric Functions on "account_number" and "account_balance"
+mysql> -- Round account_balance to nearest integer
+mysql> SELECT account_balance, ROUND(account_balance) AS balance_rounded FROM account;
++-----------------+-----------------+
+| account_balance | balance_rounded |
++-----------------+-----------------+
+|        15000.00 |           15000 |
+|        10500.75 |           10501 |
+|        17550.25 |           17550 |
+|        22000.30 |           22000 |
+|        20500.55 |           20501 |
++-----------------+-----------------+
+5 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- Ceiling of account_balance
+mysql> SELECT account_balance, CEIL(account_balance) AS balance_ceiled FROM account;
++-----------------+----------------+
+| account_balance | balance_ceiled |
++-----------------+----------------+
+|        15000.00 |          15000 |
+|        10500.75 |          10501 |
+|        17550.25 |          17551 |
+|        22000.30 |          22001 |
+|        20500.55 |          20501 |
++-----------------+----------------+
+5 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- Floor of account_balance
+mysql> SELECT account_balance, FLOOR(account_balance) AS balance_floored FROM account;
++-----------------+-----------------+
+| account_balance | balance_floored |
++-----------------+-----------------+
+|        15000.00 |           15000 |
+|        10500.75 |           10500 |
+|        17550.25 |           17550 |
+|        22000.30 |           22000 |
+|        20500.55 |           20500 |
++-----------------+-----------------+
+5 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- Sign of account_balance (returns -1 for negative, 0 for zero, and 1 for positive values)
+mysql> SELECT account_balance, SIGN(account_balance) AS balance_sign FROM account;
++-----------------+--------------+
+| account_balance | balance_sign |
++-----------------+--------------+
+|        15000.00 |            1 |
+|        10500.75 |            1 |
+|        17550.25 |            1 |
+|        22000.30 |            1 |
+|        20500.55 |            1 |
++-----------------+--------------+
+5 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- 3(c) Date Functions
+mysql> -- Current date and system date (if using Oracle, use SYSDATE; for MySQL, use CURRENT_DATE)
+mysql> SELECT CURRENT_DATE AS current_date, SYSDATE() AS system_date;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'current_date, SYSDATE() AS system_date' at line 1
+mysql> 
+mysql> -- Extract month from current date
+mysql> SELECT EXTRACT(MONTH FROM CURRENT_DATE) AS current_month;
++---------------+
+| current_month |
++---------------+
+|            11 |
++---------------+
+1 row in set (0.00 sec)
+
+mysql> 
+mysql> -- Extract year from current date
+mysql> SELECT EXTRACT(YEAR FROM CURRENT_DATE) AS current_year;
++--------------+
+| current_year |
++--------------+
+|         2024 |
++--------------+
+1 row in set (0.00 sec)
+
+mysql> 
+mysql> -- 3(d) ASCII Function
+mysql> -- Compute the ASCII value of minimum of 5 alphabets
+mysql> SELECT ASCII('A') AS ascii_A, ASCII('B') AS ascii_B, ASCII('C') AS ascii_C, ASCII('D') AS ascii_D, ASCII('E') AS ascii_E;
++---------+---------+---------+---------+---------+
+| ascii_A | ascii_B | ascii_C | ascii_D | ascii_E |
++---------+---------+---------+---------+---------+
+|      65 |      66 |      67 |      68 |      69 |
++---------+---------+---------+---------+---------+
+1 row in set (0.00 sec)
+

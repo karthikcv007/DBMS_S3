@@ -1,0 +1,159 @@
+mysql> create database db;
+Query OK, 1 row affected (0.02 sec)
+
+mysql> use db;
+Database changed
+mysql> -- 1. Create the ACTOR table
+mysql> CREATE TABLE ACTOR (
+    ->     act_id INT PRIMARY KEY,
+    ->     act_name VARCHAR(50),
+    ->     act_gender VARCHAR(10)
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> 
+mysql> -- 2. Create the DIRECTOR table
+mysql> CREATE TABLE DIRECTOR (
+    ->     dir_id INT PRIMARY KEY,
+    ->     dir_name VARCHAR(50),
+    ->     dir_phone VARCHAR(15)
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> 
+mysql> -- 3. Create the MOVIES table with foreign key reference to DIRECTOR
+mysql> CREATE TABLE MOVIES (
+    ->     mov_id INT PRIMARY KEY,
+    ->     mov_title VARCHAR(100),
+    ->     mov_year INT,
+    ->     mov_lang VARCHAR(30),
+    ->     dir_id INT,
+    ->     FOREIGN KEY (dir_id) REFERENCES DIRECTOR(dir_id)
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> 
+mysql> -- 4. Create the MOVIE_CAST table with foreign key references to ACTOR and MOVIES
+mysql> CREATE TABLE MOVIE_CAST (
+    ->     act_id INT,
+    ->     mov_id INT,
+    ->     role VARCHAR(50),
+    ->     FOREIGN KEY (act_id) REFERENCES ACTOR(act_id),
+    ->     FOREIGN KEY (mov_id) REFERENCES MOVIES(mov_id),
+    ->     PRIMARY KEY (act_id, mov_id)
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> 
+mysql> -- 5. Create the RATING table with foreign key reference to MOVIES
+mysql> CREATE TABLE RATING (
+    ->     mov_id INT,
+    ->     rev_stars INT,
+    ->     FOREIGN KEY (mov_id) REFERENCES MOVIES(mov_id)
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> 
+mysql> -- 6. Insert sample data into the tables (example data)
+mysql> INSERT INTO DIRECTOR (dir_id, dir_name, dir_phone) VALUES (1, 'Hitch Cock', '1234567890'), (2, 'Steven Spielberg', '0987654321');
+Query OK, 2 rows affected (0.00 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO ACTOR (act_id, act_name, act_gender) VALUES (1, 'Robert Downey Jr.', 'Male'), (2, 'Scarlett Johansson', 'Female');
+Query OK, 2 rows affected (0.00 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO MOVIES (mov_id, mov_title, mov_year, mov_lang, dir_id) VALUES (1, 'Psycho', 1960, 'English', 1), (2, 'Jaws', 1975, 'English', 2);
+Query OK, 2 rows affected (0.00 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO MOVIE_CAST (act_id, mov_id, role) VALUES (1, 1, 'Main Actor'), (2, 2, 'Supporting');
+Query OK, 2 rows affected (0.00 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO RATING (mov_id, rev_stars) VALUES (1, 4), (2, 5);
+Query OK, 2 rows affected (0.00 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+mysql> 
+mysql> -- Queries
+mysql> 
+mysql> -- 1. List the title of all movies directed by 'Hitch Cock'
+mysql> SELECT mov_title
+    -> FROM MOVIES
+    -> JOIN DIRECTOR ON MOVIES.dir_id = DIRECTOR.dir_id
+    -> WHERE DIRECTOR.dir_name = 'Hitch Cock';
++-----------+
+| mov_title |
++-----------+
+| Psycho    |
++-----------+
+1 row in set (0.00 sec)
+
+mysql> 
+mysql> -- 2. Find the movie names where one or more actors acted in two or more movies
+mysql> SELECT mov_title
+    -> FROM MOVIES
+    -> WHERE mov_id IN (
+    ->     SELECT mov_id
+    ->     FROM MOVIE_CAST
+    ->     GROUP BY act_id, mov_id
+    ->     HAVING COUNT(DISTINCT mov_id) >= 2
+    -> );
+Empty set (0.00 sec)
+
+mysql> 
+mysql> -- 3. List all actors who acted in a movie before 2000 or in a movie after 2015 (use JOIN operation)
+mysql> SELECT DISTINCT ACTOR.act_name
+    -> FROM ACTOR
+    -> JOIN MOVIE_CAST ON ACTOR.act_id = MOVIE_CAST.act_id
+    -> JOIN MOVIES ON MOVIE_CAST.mov_id = MOVIES.mov_id
+    -> WHERE MOVIES.mov_year < 2000 OR MOVIES.mov_year > 2015;
++--------------------+
+| act_name           |
++--------------------+
+| Robert Downey Jr.  |
+| Scarlett Johansson |
++--------------------+
+2 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- 4. Update rating of all movies directed by 'Steven Spielberg' to 5
+mysql> UPDATE RATING
+    -> SET rev_stars = 5
+    -> WHERE mov_id IN (
+    ->     SELECT mov_id
+    ->     FROM MOVIES
+    ->     JOIN DIRECTOR ON MOVIES.dir_id = DIRECTOR.dir_id
+    ->     WHERE DIRECTOR.dir_name = 'Steven Spielberg'
+    -> );
+Query OK, 0 rows affected (0.00 sec)
+Rows matched: 1  Changed: 0  Warnings: 0
+
+mysql> 
+mysql> -- 5. Find the title of movies and number of stars for each movie that has at least one rating
+mysql> SELECT MOVIES.mov_title, RATING.rev_stars
+    -> FROM MOVIES
+    -> JOIN RATING ON MOVIES.mov_id = RATING.mov_id;
++-----------+-----------+
+| mov_title | rev_stars |
++-----------+-----------+
+| Psycho    |         4 |
+| Jaws      |         5 |
++-----------+-----------+
+2 rows in set (0.00 sec)
+
+mysql> SELECT mov_title, MAX(rev_stars) AS max_stars
+    -> FROM MOVIES
+    -> JOIN RATING ON MOVIES.mov_id = RATING.mov_id
+    -> GROUP BY mov_title
+    -> ORDER BY mov_title;
++-----------+-----------+
+| mov_title | max_stars |
++-----------+-----------+
+| Jaws      |         5 |
+| Psycho    |         4 |
++-----------+-----------+
+2 rows in set (0.00 sec)
+
+

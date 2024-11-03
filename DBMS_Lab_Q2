@@ -1,0 +1,211 @@
+mysql> create database db3;
+Query OK, 1 row affected (0.02 sec)
+
+mysql> use db3;
+Database changed
+mysql> -- Step 1: Create the Employee Table (emp) with emp_id starting with 'E' and emp_name constraint.
+Smysql> CREATE TABLE emp (
+    ->     emp_id VARCHAR(10) PRIMARY KEY,
+    ->     emp_name VARCHAR(100) NOT NULL,
+    ->     street_no INT,
+    ->     city VARCHAR(100)
+    -> );
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> 
+ mysql> -- Step 2: Create the Company Table (company).
+mysql> CREATE TABLE company (
+    ->     company_name VARCHAR(100) PRIMARY KEY,
+    ->     city VARCHAR(100)
+    -> );
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> 
+mysql> -- Step 3: Create the Works Table (works) with Foreign Key constraint.
+mysql> CREATE TABLE works (
+    ->     emp_id VARCHAR(10),
+    ->     company_name VARCHAR(100),
+    ->     salary DECIMAL(10, 2),
+    ->     FOREIGN KEY (emp_id) REFERENCES emp(emp_id),
+    ->     FOREIGN KEY (company_name) REFERENCES company(company_name)
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> 
+mysql> -- Step 4: Create the Manages Table (manages) with Foreign Key constraint on emp_id and manager_id.
+mysql> CREATE TABLE manages (
+    ->     emp_id VARCHAR(10),
+    ->     manager_id VARCHAR(10),
+    ->     FOREIGN KEY (emp_id) REFERENCES emp(emp_id),
+    ->     FOREIGN KEY (manager_id) REFERENCES emp(emp_id)
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> 
+mysql> -- Step 5: Add a constraint to ensure emp_name cannot be NULL in emp table.
+mysql> ALTER TABLE emp 
+    -> ADD CONSTRAINT emp_name_not_null CHECK (emp_name IS NOT NULL);
+Query OK, 0 rows affected (0.02 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> 
+mysql> -- Step 6: Insert sample data into the tables.
+mysql> -- Insert into emp table
+mysql> INSERT INTO emp (emp_id, emp_name, street_no, city) VALUES ('E001', 'John Doe', 101, 'Mumbai');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO emp (emp_id, emp_name, street_no, city) VALUES ('E002', 'Jane Smith', 202, 'Delhi');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO emp (emp_id, emp_name, street_no, city) VALUES ('E003', 'Michael Brown', 303, 'Mumbai');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> 
+mysql> -- Insert into company table
+mysql> INSERT INTO company (company_name, city) VALUES ('SBI', 'Mumbai');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO company (company_name, city) VALUES ('Indian Bank', 'Delhi');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> 
+mysql> -- Insert into works table
+mysql> INSERT INTO works (emp_id, company_name, salary) VALUES ('E001', 'SBI', 50000);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO works (emp_id, company_name, salary) VALUES ('E002', 'Indian Bank', 60000);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO works (emp_id, company_name, salary) VALUES ('E003', 'SBI', 55000);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> 
+mysql> -- Insert into manages table
+mysql> INSERT INTO manages (emp_id, manager_id) VALUES ('E002', 'E001'); -- E002 managed by E001
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO manages (emp_id, manager_id) VALUES ('E003', 'E002'); -- E003 managed by E002
+Query OK, 1 row affected (0.00 sec)
+
+mysql> 
+mysql> -- Step 7: Queries
+mysql> 
+mysql> -- (a) Find the names of all employees who work for SBI.
+mysql> SELECT e.emp_name 
+    -> FROM emp e 
+    -> JOIN works w ON e.emp_id = w.emp_id 
+    -> WHERE w.company_name = 'SBI';
++---------------+
+| emp_name      |
++---------------+
+| John Doe      |
+| Michael Brown |
++---------------+
+2 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- (b) Find all employees who live in the same cities as the companies for which they work.
+mysql> SELECT e.emp_name 
+    -> FROM emp e 
+    -> JOIN works w ON e.emp_id = w.emp_id 
+    -> JOIN company c ON w.company_name = c.company_name 
+    -> WHERE e.city = c.city;
++---------------+
+| emp_name      |
++---------------+
+| Jane Smith    |
+| John Doe      |
+| Michael Brown |
++---------------+
+3 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- (c) Find all employees and their managers in the database who live in the same cities and on the same street number as their managers.
+mysql> SELECT e.emp_name AS Employee, m.emp_name AS Manager 
+    -> FROM emp e 
+    -> JOIN manages mg ON e.emp_id = mg.emp_id 
+    -> JOIN emp m ON mg.manager_id = m.emp_id 
+    -> WHERE e.city = m.city AND e.street_no = m.street_no;
+Empty set (0.00 sec)
+
+mysql> 
+mysql> -- (d) Find all employees who earn more than the average salary of all employees of their company.
+mysql> SELECT e.emp_name, w.salary
+    -> FROM emp e
+    -> JOIN works w ON e.emp_id = w.emp_id
+    -> WHERE w.salary > (
+    ->     SELECT AVG(w2.salary) 
+    ->     FROM works w2 
+    ->     WHERE w2.company_name = w.company_name
+    -> );
++---------------+----------+
+| emp_name      | salary   |
++---------------+----------+
+| Michael Brown | 55000.00 |
++---------------+----------+
+1 row in set (0.01 sec)
+
+mysql> 
+mysql> -- (e) Find the company that pays the least total salary along with the salary paid.
+mysql> SELECT w.company_name, SUM(w.salary) AS total_salary
+    -> FROM works w
+    -> GROUP BY w.company_name
+    -> ORDER BY total_salary ASC
+    -> LIMIT 1;
++--------------+--------------+
+| company_name | total_salary |
++--------------+--------------+
+| Indian Bank  |     60000.00 |
++--------------+--------------+
+1 row in set (0.00 sec)
+
+mysql> 
+mysql> -- (f) Give all managers of SBI a 10 percent raise.
+mysql> UPDATE works
+    -> SET salary = salary * 1.10
+    -> WHERE emp_id IN (
+    ->     SELECT manager_id 
+    ->     FROM manages 
+    ->     JOIN works ON manages.manager_id = works.emp_id
+    ->     WHERE works.company_name = 'SBI'
+    -> );
+ERROR 1093 (HY000): You can't specify target table 'works' for update in FROM clause
+mysql> 
+mysql> -- (g) Find the company that has the most employees.
+mysql> SELECT w.company_name, COUNT(w.emp_id) AS num_employees
+    -> FROM works w
+    -> GROUP BY w.company_name
+    -> ORDER BY num_employees DESC
+    -> LIMIT 1;
++--------------+---------------+
+| company_name | num_employees |
++--------------+---------------+
+| SBI          |             2 |
++--------------+---------------+
+1 row in set (0.00 sec)
+
+mysql> 
+mysql> -- (h) Find those companies whose employees earn a higher salary, on average, than the average salary at Indian Bank.
+mysql> SELECT w.company_name
+    -> FROM works w
+    -> GROUP BY w.company_name
+    -> HAVING AVG(w.salary) > (
+    ->     SELECT AVG(salary) 
+    ->     FROM works 
+    ->     WHERE company_name = 'Indian Bank'
+    -> );
+Empty set (0.00 sec)
+
+mysql> 
+mysql> -- (i) Query to find the name and salary of all employees who earn more than each employee of Indian Bank.
+mysql> SELECT e.emp_name, w.salary
+    -> FROM emp e
+    -> JOIN works w ON e.emp_id = w.emp_id
+    -> WHERE w.salary > ALL (
+    ->     SELECT salary 
+    ->     FROM works 
+    ->     WHERE company_name = 'Indian Bank'
+    -> );
+Empty set (0.00 sec)
+
+
